@@ -1,0 +1,37 @@
+name: Driver Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    types: [ opened, labeled, unlabeled, synchronize ]
+
+env:
+  GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx8g -Dorg.gradle.daemon=false -Dkotlin.incremental=false"
+
+jobs:
+  check:
+    name: Build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: 25
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - run: ./gradlew assemble
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: drivers
+          path: build/drivers/**
